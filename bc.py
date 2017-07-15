@@ -3,8 +3,9 @@ import asyncio
 import logging
 from random import randint, random
 import telepot
+from telepot.aio.helper import ChatHandler
 
-class BigC(telepot.aio.helper.ChatHandler):
+class BigC(ChatHandler):
     def __init__(self,  *args, **kwargs):
         super(BigC, self).__init__(*args, **kwargs)
 

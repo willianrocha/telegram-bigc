@@ -1,4 +1,3 @@
-import bigc
 from bc import BigC
 import time
 import logging

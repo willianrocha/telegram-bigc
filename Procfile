@@ -1,1 +1,1 @@
-worker: python start.py $TELEGRAM_TOKEN
+worker: python start.py

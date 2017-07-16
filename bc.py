@@ -5,18 +5,20 @@ from random import randint, random
 import telepot
 from telepot.aio.helper import ChatHandler
 
+import os
+from pymongo import MongoClient
+
+
 class BigC(ChatHandler):
     def __init__(self,  *args, **kwargs):
         super(BigC, self).__init__(*args, **kwargs)
-
-        self.list_senteces = ["mas deixe","hum hum","ai ai", "é mesmo é?", "como é que é \
-        o negócio?", "como é que é essa história?","ô que vida, ein?", "Eita",
-        "Será o Bené?", "Que pozinho é esse?", "de repente, não mais que de repente",
-        "como é que é essa história {0}?","que foi que tu disse {0}?",
-        "Tudo bem, moça?", "Fale Sr. {0}", "E ai Sr. {0}",
-        "Mas, e ai Sr. {0}, conte uma nova",  "Top de linda", "Miau Gatinha"]
+        self.uri = os.environ.get('DB_URI')
+        self.client = MongoClient(self.uri)
+        self.db = self.client['telegram-bigc']
+        self.phrases = self.db['sentences']
+        self.list_senteces = [x['sentence'] for x in self.phrases.find({})]
+        self.got_list = False
         self.rate_num = 50.0
-        # self._answer = random.randint(0,99)
 
     async def on_chat_message(self, msg):
         content_type, chat_type, chat_id = telepot.glance(msg)
@@ -32,7 +34,7 @@ class BigC(ChatHandler):
         if content_type == 'text' and rng < rate:
             message = self.list_senteces[randint(1, len(self.list_senteces)-1)] \
                 .format(msg['from']['first_name'])
-            logging.info('Content type: {} :: Chat type: {} :: Chat Id:{}'.format(content_type, chat_type, chat_id))
+            logging.info('Content type:{}::Chat type:{}::Chat Id:{}::Message:{}'.format(content_type, chat_type, chat_id, message))
             await self.sender.sendMessage(message)
         return
 
@@ -57,7 +59,7 @@ class BigC(ChatHandler):
 
     def command_handler(self, msg, chat_id):
         command_splited = msg['text'].split()
-        logging.info('Msg: {} ::Chat Id:{}'.format(msg, chat_id))
+        logging.info('Msg:{}::ChatId:{}'.format(command_splited[0], chat_id))
 
         if "/chance" in command_splited[0]:
             return self.command_set_rate(msg, chat_id)

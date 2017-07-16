@@ -75,7 +75,7 @@ class BigC(ChatHandler):
         ans = {}
         for x in self.rates.find({}):
             for y in x.keys():
-                if y != '_id':
+                if y != '_id' or y != 'chat_id':
                     ans[y] = x[y]
         return ans
 
@@ -90,6 +90,8 @@ class BigC(ChatHandler):
         cid = str(chat_id)
         logging.info('set_rate:::ChatId:{}::Rate:{}'.format(chat_id, rate))
         if not cid in self.rate_percent.keys():
-            self.rates.insert_one({cid: rate})
+            self.rates.insert_one({cid: rate, 'chat_id': chat_id})
+        else:
+            self.rates.update_one({'chat_id': chat_id}, {'$set': {cid: rate}})
         self.rate_percent[cid] = rate
         return self.rate_percent[cid]
